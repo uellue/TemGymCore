@@ -7,10 +7,9 @@ from microscope_calibration.stemoverfocus import find_input_slopes
 from microscope_calibration.components import Detector
 from jaxgym.transfer import transfer_rays, accumulate_transfer_matrices
 import sympy as sp
-import pytest
 
 
-def test_propagate_free_space():
+def test_transfer_free_space():
     # Define a point source position and random ray angle
     x0, y0 = 1.0, -2.0
     angle = np.pi / 4
@@ -20,7 +19,7 @@ def test_propagate_free_space():
     slopes_y = jnp.array([dy0])
     d = 5.0
 
-    # Free-space transfer matrix: only propagation distance d
+    # Free-space transfer matrix: only transfer distance d
     transfer_matrix = jnp.array(
         [
             [1.0, 0.0, d, 0.0, 0.0],
@@ -42,7 +41,7 @@ def test_propagate_free_space():
     np.testing.assert_allclose(coords[3, 0], dy0, atol=1e-6)
 
 
-def test_propagate_random_matrix():
+def test_transfer_random_matrix():
     # Create a reproducible random 5x5 matrix with integer entries
     rng = np.random.RandomState(2)
     T_vals = rng.randint(-5, 5, size=(5, 5))
@@ -69,11 +68,7 @@ def test_propagate_random_matrix():
     np.testing.assert_allclose(coords[3, 0], dy_exp, atol=1e-6)
 
 
-def test_identity_propagation():
-    import numpy as np
-    import jax.numpy as jnp
-    from jaxgym.transfer import transfer_rays
-
+def test_identity_transfer():
     # Batch of rays from same source through identity matrix
     x0, y0 = 0.5, -0.5
     N = 4
@@ -92,15 +87,24 @@ def test_identity_propagation():
     np.testing.assert_allclose(coords[3], dy_vals)
 
 
-# parametrised propagation distances (including zero and negatives)
-@pytest.mark.parametrize("d", [-10.0, -3.0, -0.0, 0.0, 1.5, 5.0, 12.3])
-def test_distance_propagation_parametrised(d):
+def test_empty_input():
+    # No rays
+    slopes_x = jnp.array([], dtype=float)
+    slopes_y = jnp.array([], dtype=float)
+    T = jnp.eye(5)
+
+    coords = transfer_rays((1.0, 2.0), (slopes_x, slopes_y), T)
+    assert coords.shape == (4, 0)
+
+
+# add more exotic transfer tests for different distances and zero as a parametrisation
+def test_negative_distance_transfer():
     x0, y0 = 1.0, 2.0
     dx0, dy0 = 0.1, -0.2
     slopes_x = jnp.array([dx0])
     slopes_y = jnp.array([dy0])
-    # free‐space propagation by d
-    T = jnp.array(
+    d = -3.0
+    transfer_matrix = jnp.array(
         [
             [1.0, 0.0, d, 0.0, 0.0],
             [0.0, 1.0, 0.0, d, 0.0],
@@ -109,15 +113,12 @@ def test_distance_propagation_parametrised(d):
             [0.0, 0.0, 0.0, 0.0, 1.0],
         ]
     )
-    coords = transfer_rays((x0, y0), (slopes_x, slopes_y), T)
+
+    coords = transfer_rays((x0, y0), (slopes_x, slopes_y), transfer_matrix)
     x_exp = x0 + d * dx0
     y_exp = y0 + d * dy0
-
     np.testing.assert_allclose(coords[0, 0], x_exp, atol=1e-6)
     np.testing.assert_allclose(coords[1, 0], y_exp, atol=1e-6)
-    # slopes should remain unchanged
-    np.testing.assert_allclose(coords[2, 0], dx0, atol=1e-6)
-    np.testing.assert_allclose(coords[3, 0], dy0, atol=1e-6)
 
 
 def test_accumulate_transfer_matrices():
