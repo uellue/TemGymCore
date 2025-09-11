@@ -1,4 +1,5 @@
-from typing import NamedTuple, Dict
+from typing import NamedTuple
+
 import jax; jax.config.update("jax_enable_x64", True)  # noqa: E702
 import jax_dataclasses as jdc
 import jax.numpy as jnp
@@ -187,7 +188,7 @@ class AberratedLensKrivanek(Lens):
     aber_coeffs : jnp.ndarray
 
     """
-    coeffs: Dict
+    coeffs: dict
 
     def __call__(self, ray: Ray):
         f = self.focal_length
