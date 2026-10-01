@@ -1,4 +1,4 @@
-from typing import NamedTuple
+from typing import NamedTuple, Self
 
 import jax; jax.config.update("jax_enable_x64", True)  # noqa: E702
 import jax_dataclasses as jdc
@@ -9,6 +9,7 @@ from .grid import Grid
 from . import Degrees, CoordsXY, ScaleYX, ShapeYX
 from .tree_utils import HasParamsMixin
 from .aberrations import grad_W_krivanek, W_krivanek
+
 
 class Component(HasParamsMixin):
     """Base component that transforms a ray without side effects.
@@ -113,6 +114,36 @@ class DescanError(NamedTuple):
                 [self.syo_pxi, self.syo_pyi, 0.0, 0.0, self.offsyi],
                 [0.0, 0.0, 0.0, 0.0, 1.0],
             ]
+        )
+
+    def derive(
+            self,
+            pxo_pxi: float | None = None,
+            pxo_pyi: float | None = None,
+            pyo_pxi: float | None = None,
+            pyo_pyi: float | None = None,
+            sxo_pxi: float | None = None,
+            sxo_pyi: float | None = None,
+            syo_pxi: float | None = None,
+            syo_pyi: float | None = None,
+            offpxi: float | None = None,
+            offpyi: float | None = None,
+            offsxi: float | None = None,
+            offsyi: float | None = None
+    ) -> Self:
+        return self.__class__(
+            pxo_pxi=self.pxo_pxi if pxo_pxi is None else pxo_pxi,
+            pxo_pyi=self.pxo_pyi if pxo_pyi is None else pxo_pyi,
+            pyo_pxi=self.pyo_pxi if pyo_pxi is None else pyo_pxi,
+            pyo_pyi=self.pyo_pyi if pyo_pyi is None else pyo_pyi,
+            sxo_pxi=self.sxo_pxi if sxo_pxi is None else sxo_pxi,
+            sxo_pyi=self.sxo_pyi if sxo_pyi is None else sxo_pyi,
+            syo_pxi=self.syo_pxi if syo_pxi is None else syo_pxi,
+            syo_pyi=self.syo_pyi if syo_pyi is None else syo_pyi,
+            offpxi=self.offpxi if offpxi is None else offpxi,
+            offpyi=self.offpyi if offpyi is None else offpyi,
+            offsxi=self.offsxi if offsxi is None else offsxi,
+            offsyi=self.offsyi if offsyi is None else offsyi,
         )
 
 
