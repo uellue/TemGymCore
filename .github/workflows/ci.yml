@@ -42,6 +42,7 @@ jobs:
       #   env:
       #     CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   mc-tests:
+    if: false  # skip job for now, microscope-calibration is WIP
     strategy:
       matrix:
         python_version: ["3.12"]
@@ -58,6 +59,7 @@ jobs:
         run: python3 -m pip install uv
       - name: install core
         run: uv pip install --system .
+      # TODO probably try to install just with HTTP?
       - uses: webfactory/ssh-agent@v0.9.1
         with:
             ssh-private-key: ${{ secrets.MC_DEPLOY_KEY }}
