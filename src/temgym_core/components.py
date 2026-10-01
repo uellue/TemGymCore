@@ -1,4 +1,4 @@
-from typing import NamedTuple, Self
+from typing import NamedTuple
 
 import jax; jax.config.update("jax_enable_x64", True)  # noqa: E702
 import jax_dataclasses as jdc
@@ -130,7 +130,7 @@ class DescanError(NamedTuple):
             offpyi: float | None = None,
             offsxi: float | None = None,
             offsyi: float | None = None
-    ) -> Self:
+    ) -> 'DescanError':
         return self.__class__(
             pxo_pxi=self.pxo_pxi if pxo_pxi is None else pxo_pxi,
             pxo_pyi=self.pxo_pyi if pxo_pyi is None else pxo_pyi,
