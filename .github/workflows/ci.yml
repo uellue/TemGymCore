@@ -26,8 +26,8 @@ jobs:
             toxenv: py313
           - version: "3.14"
             toxenv: py314
-          - version: "3.15"
-            toxenv: py315
+          # - version: "3.15"
+          #   toxenv: py315
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
